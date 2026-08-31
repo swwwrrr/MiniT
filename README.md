@@ -10,123 +10,209 @@
 
 ---
 
-MiniT is a lightweight desktop shell that lets you organize small tools — web-based or local — into **Spaces**, open them in tabs, and jump between them instantly with a keyboard-driven search. Think of it as a personal dashboard for the little utilities you use every day: converters, generators, internal dashboards, local HTML tools, and anything else you'd rather not hunt for in a pile of browser tabs.
+MiniT is a lightweight desktop shell that lets you organize small tools — web-based or local — into **Spaces**, open them in tabs, and access them instantly with keyboard-driven search.
+
+It is designed for everyday utilities such as converters, generators, dashboards, local HTML tools, and other small applications that you would otherwise keep as separate browser tabs or programs.
 
 ## Features
 
-- 🗂️ **Spaces** — group tools into custom workspaces, add/delete freely
-- 🧩 **Tool cards with folders** — organize tools visually
-- 🌐 **Local & Online tools** — embed a URL or a local HTML app, both run via WebView2
-- 📇 **Tool Registry** — simple JSON manifest system, no rebuild required to add tools
-- 🪟 **Tabs** — keep several tools open at once and switch between them
-- 🔍 **Instant search** (`Ctrl+K`) — find and launch any tool without touching the mouse
-- ⭐ **Favorites** — pin the tools you use most
-- 🎨 **Light / Dark / System theme**
-- ⌨️ **Keyboard-first navigation**
-- 🧪 **UUID Generator** — included as a demo/reference tool
-- 💾 **Local data only** — everything lives in `%LocalAppData%\MiniT\`, nothing phones home
-- 🧱 **MVVM** — built with CommunityToolkit.Mvvm for a clean, testable structure
+* 🗂️ **Spaces** — group tools into custom workspaces
+* 🧩 **Tool cards with folders** — organize tools visually
+* 🌐 **Local & Online tools** — run both web-based and local HTML tools through WebView2
+* 📇 **Tool Registry** — JSON-based tool definitions
+* 🪟 **Tabs** — keep multiple tools open at once
+* 🔍 **Instant search** (`Ctrl+K`) — quickly find and open tools
+* ⭐ **Favorites** — mark frequently used tools
+* 🎨 **Light / Dark / System theme**
+* ⌨️ **Keyboard-first navigation**
+* 🧪 **UUID Generator** — included built-in tool
+* 💾 **Local data only** — user data is stored locally in `%LocalAppData%\MiniT\`
+* 🧱 **MVVM** — built with CommunityToolkit.Mvvm
 
 ## Requirements
 
-- Windows 10 (build 19041+) or Windows 11
-- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
-- [Windows App SDK 1.6](https://learn.microsoft.com/windows/apps/windows-app-sdk/downloads)
-- Visual Studio 2022 (17.8+) **or** the `dotnet` CLI
+* Windows 10 (build 19041+) or Windows 11
+* [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+* [Windows App SDK 1.6](https://learn.microsoft.com/windows/apps/windows-app-sdk/downloads)
+* Visual Studio 2022 (17.8+) **or** the `dotnet` CLI
 
 ## Getting Started
+
+Clone the repository:
 
 ```bash
 git clone https://github.com/sstce/MiniT.git
 cd MiniT
+```
 
-# Restore packages
+Restore dependencies:
+
+```bash
 dotnet restore
+```
 
-# Build (x64)
+Build for x64:
+
+```bash
 dotnet build -f net8.0-windows10.0.19041.0 -r win-x64
+```
 
-# Run
+Run:
+
+```bash
 dotnet run -f net8.0-windows10.0.19041.0 -r win-x64
 ```
 
-Or just open `MiniT.csproj` in **Visual Studio 2022**, select the **x64** platform, and hit **F5**.
+Alternatively, open `MiniT.csproj` in **Visual Studio 2022**, select the **x64** platform, and press **F5**.
 
 ## Keyboard Shortcuts
 
-| Key | Action |
-|---|---|
-| `Ctrl+K` | Open search |
-| `Escape` | Close search / close active tab |
+| Key                 | Action                                  |
+| ------------------- | --------------------------------------- |
+| `Ctrl+K`            | Open search                             |
+| `Escape`            | Close search / close active tab         |
 | `Ctrl+1` … `Ctrl+3` | Switch to the 1st / 2nd / 3rd open tool |
 
 ## Tool Types
 
-MiniT's naming here is a bit subtle, so it's worth spelling out. There are really only two values in the `ToolType` enum that matter day-to-day — **Online** and **Local** — but "Local" itself covers two very different situations depending on one extra field:
+MiniT supports two main tool types: **Online** and **Local**.
 
-| Type | What it is | How it opens |
-|---|---|---|
-| **Online** | A tool that lives at a URL | Embedded via WebView2, pointed at the URL |
-| **Local (site)** | A tool on disk with an `index.html` (something you built with plain HTML/JS, or a `dist`/`build` folder), added via **Add Tool → Browse…** | Embedded via WebView2, pointed at that local file. `ToolDefinition.LocalEntryPath` is set. |
-| **Local (built-in)** | A tool that is part of MiniT itself — a real XAML page written in C#, like the bundled UUID Generator | Rendered natively as a Page, found via `Entry`. No WebView2, and `LocalEntryPath` is left empty. |
+| Type                 | What it is                                             | How it opens                                |
+| -------------------- | ------------------------------------------------------ | ------------------------------------------- |
+| **Online**           | A tool available at a web URL                          | Embedded in WebView2                        |
+| **Local**            | A local HTML tool stored on disk                       | Embedded in WebView2 from a local HTML file |
+| **Local (built-in)** | A tool implemented directly in MiniT using XAML and C# | Rendered natively as a WinUI page           |
 
-In other words: both "Local (site)" and "Local (built-in)" carry `Type: Local` in their `manifest.json` — what actually decides *how* MiniT opens them is whether `LocalEntryPath` is set. If it is, MiniT loads that HTML file in WebView2. If it isn't, MiniT looks up `Entry` in `BuiltInToolViewFactory.cs` and renders a native page instead. Keep this in mind when adding tools so you don't confuse "a Local tool the user pointed at a folder" with "a Local tool built into the app's source."
+`Local (built-in)` is technically represented by the same `Local` tool type. MiniT determines how to open it based on the tool definition: local HTML tools provide a local entry path, while built-in tools use an `Entry` value that maps to a page registered in `BuiltInToolViewFactory`.
 
 ## Adding Tools
 
-### From the UI (Online / Local)
+### From the UI
 
-The sidebar's **Add Tool** button handles both non-built-in types from one dialog:
+The **Add Tool** button allows you to add Online and Local HTML tools.
 
-- **Online** — provide a name, URL, description, and category.
-- **Local** — provide a name, description, category, and pick a folder with **Browse…**. MiniT looks for `index.html` / `index.htm` in that folder (falling back to any `.html` file, including one level deep for `dist`/`build`-style output), then opens it the same way — embedded via WebView2, just pointed at the local file.
+#### Online tools
 
-Both are saved as `manifest.json` under `%LocalAppData%\MiniT\Tools\<id>\` and are picked up automatically on next launch.
+Provide:
 
-### Adding a Built-in Tool
+* Name
+* URL
+* Description
+* Category
 
-This is for tools you want to ship as part of MiniT's source code, not something end users add via the UI:
+The tool is opened inside MiniT using WebView2.
 
-1. Create `UI/Pages/MyToolPage.xaml` + `MyToolPage.xaml.cs`
-2. Register it in `BuiltInToolViewFactory.cs`:
-   ```csharp
-   "MyToolPage" => new MyToolPage(),
-   ```
-3. (Optional) Add an entry to `Registry/tools.json` if you want it discoverable/searchable the same way as other tools, using `"entry": "MyToolPage"` to point at the factory key above.
-4. Add the tool to a Space in `%LocalAppData%\MiniT\config\spaces.json`
+#### Local tools
+
+Provide:
+
+* Name
+* Description
+* Category
+* A folder containing the tool
+
+MiniT searches the selected folder for `index.html` or `index.htm`. If neither is found, it can fall back to another `.html` file, including files one level deep in folders such as `dist` or `build`.
+
+The selected tool is then opened through WebView2.
+
+User-added tools are stored under:
+
+```text
+%LocalAppData%\MiniT\Tools\<id>\
+```
+
+with their corresponding `manifest.json`.
+
+## Built-in Tools
+
+Built-in tools are implemented directly inside the MiniT source code using XAML and C#.
+
+To add a new built-in tool:
+
+1. Create a new page in `UI/Pages/`:
+
+```text
+UI/Pages/MyToolPage.xaml
+UI/Pages/MyToolPage.xaml.cs
+```
+
+2. Register the page in `BuiltInToolViewFactory.cs`:
+
+```csharp
+"MyToolPage" => new MyToolPage(),
+```
+
+3. Add the corresponding tool definition to `Registry/tools.json` if it should be included in the tool registry.
+
+4. Add the tool to a Space through MiniT's configuration.
 
 ## Architecture
 
-```
+```text
 MiniT/
 ├── Core/
-│   ├── Models/          # ToolDefinition, SpaceDefinition, Settings
-│   └── Services/        # ToolRegistry, ToolLauncher, SpaceService, SettingsService
+│   ├── Models/
+│   │   ├── MiniTSettings.cs
+│   │   ├── SpaceDefinition.cs
+│   │   └── ToolDefinition.cs
+│   └── Services/
+│       ├── BuiltInToolViewFactory.cs
+│       ├── SettingsService.cs
+│       ├── SpaceService.cs
+│       ├── ToolLauncher.cs
+│       └── ToolRegistry.cs
+│
 ├── UI/
-│   ├── Pages/           # UuidGeneratorPage, SpaceContentPage, SettingsPage, WebToolPage
-│   ├── Controls/        # ToolCard, SimpleWrapPanel
-│   └── ViewModels/      # MainViewModel, SpaceViewModel, ToolCardVM, TabItem, ToolSearchItemVM
-├── Tools/
-│   └── Local/UuidGenerator/manifest.json
-├── Registry/tools.json  # optional global tool registry
-└── App.xaml / MainWindow.xaml
+│   ├── Controls/
+│   │   ├── SimpleWrapPanel.cs
+│   │   ├── ToolCard.xaml
+│   │   └── ToolCard.xaml.cs
+│   ├── Helpers/
+│   │   ├── AddToSpaceMenu.cs
+│   │   └── Motion.cs
+│   ├── Pages/
+│   │   ├── SettingsPage.xaml
+│   │   ├── SpaceContentPage.xaml
+│   │   ├── UuidGeneratorPage.xaml
+│   │   └── WebToolPage.xaml
+│   └── ViewModels/
+│       ├── MainViewModel.cs
+│       ├── SpaceViewModel.cs
+│       ├── TabItem.cs
+│       ├── ToolCardVM.cs
+│       └── ToolSearchItemVM.cs
+│
+├── Registry/
+│   └── tools.json
+│
+├── App.xaml
+├── MainWindow.xaml
+├── MiniT.csproj
+└── app.manifest
 ```
 
 ## Data Location
 
-MiniT keeps all user data local — nothing is uploaded or synced:
+MiniT keeps user data locally:
 
-```
+```text
 %LocalAppData%\MiniT\
 ├── config\
-│   ├── settings.json    # theme, last active space
-│   └── spaces.json      # spaces, folders, favorites
-└── Tools\               # user-installed tool manifests
+│   ├── settings.json
+│   └── spaces.json
+│
+└── Tools\
+    └── <user-installed-tool>\
+        └── manifest.json
 ```
+
+MiniT does not upload or synchronize this data.
 
 ## Contributing
 
-Contributions, bug reports, and feature ideas are welcome — feel free to open an issue or a pull request.
+Contributions, bug reports, and feature ideas are welcome.
+
+If you find a bug or have an idea for MiniT, feel free to open an issue or submit a pull request.
 
 ## License
 
