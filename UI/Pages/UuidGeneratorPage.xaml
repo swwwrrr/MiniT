@@ -1,0 +1,44 @@
+<Page
+    x:Class="MiniT.UI.Pages.UuidGeneratorPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid Padding="32">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="16"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="16"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="16"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0">
+            <TextBlock Text="UUID Generator" Style="{StaticResource TitleTextBlockStyle}"/>
+            <TextBlock Text="Generate random UUIDs (v4)" Margin="0,4,0,0"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="12">
+            <TextBlock Text="Count:" VerticalAlignment="Center"/>
+            <NumberBox x:Name="CountBox" Value="1" Minimum="1" Maximum="100"
+                       SpinButtonPlacementMode="Inline" Width="120"/>
+            <Button Content="Generate" Click="OnGenerate" Style="{StaticResource AccentButtonStyle}"/>
+            <Button Content="Copy All" Click="OnCopyAll"/>
+            <Button Content="Clear" Click="OnClear"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="4" Orientation="Horizontal" Spacing="16">
+            <RadioButton x:Name="FormatLower" Content="lowercase" IsChecked="True" GroupName="fmt"/>
+            <RadioButton x:Name="FormatUpper" Content="UPPERCASE" GroupName="fmt"/>
+            <RadioButton x:Name="FormatBraces" Content="{}{GUID}" GroupName="fmt"/>
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="6">
+            <ItemsRepeater x:Name="ResultsList" Margin="0,8,0,0">
+                <ItemsRepeater.Layout>
+                    <StackLayout Spacing="8"/>
+                </ItemsRepeater.Layout>
+            </ItemsRepeater>
+        </ScrollViewer>
+    </Grid>
+</Page>

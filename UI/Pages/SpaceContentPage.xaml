@@ -1,0 +1,9 @@
+<Page
+    x:Class="MiniT.UI.Pages.SpaceContentPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <ScrollViewer Padding="28,20,28,28">
+        <StackPanel x:Name="RootStack" Spacing="30"/>
+    </ScrollViewer>
+</Page>
