@@ -41,7 +41,7 @@ It is designed for everyday utilities such as converters, generators, dashboards
 Clone the repository:
 
 ```bash
-git clone https://github.com/sstce/MiniT.git
+git clone https://github.com/swwwrrr/MiniT.git
 cd MiniT
 ```
 
